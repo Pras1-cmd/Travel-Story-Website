@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/stories', require('./routes/storyRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/comments', require('./routes/commentRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 
