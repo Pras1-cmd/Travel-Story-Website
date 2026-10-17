@@ -25,7 +25,6 @@ logs/
 *.swp
 *.swo
 *.swn
-.DS_Store
 
 # OS
 Thumbs.db

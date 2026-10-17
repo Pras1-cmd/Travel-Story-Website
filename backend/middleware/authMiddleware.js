@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'travel-story-dev-secret-key';
+
 // Protect routes - verify JWT token
 exports.protect = async (req, res, next) => {
   try {
@@ -20,7 +22,7 @@ exports.protect = async (req, res, next) => {
 
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       // Get user from token
       const user = await User.findById(decoded.id).select('-password');
@@ -61,15 +63,14 @@ exports.optionalAuth = async (req, res, next) => {
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.id).select('-password');
 
         if (user) {
           req.user = user;
         }
       } catch (error) {
-        // Continue without user if token is invalid
-        console.log('Optional auth: Invalid token, continuing without user');
+        console.warn('Optional auth: invalid token, continuing without user');
       }
     }
 

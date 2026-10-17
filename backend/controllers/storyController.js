@@ -1,5 +1,7 @@
 const Story = require('../models/Story');
+const StoryView = require('../models/StoryView');
 const Comment = require('../models/Comment');
+const Notification = require('../models/Notification');
 
 // @desc    Get all stories
 // @route   GET /api/stories
@@ -10,7 +12,7 @@ exports.getStories = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const { category, tags, author, search } = req.query;
+    const { category, tags, author, search, q, destination, reachableBy, familyFriendly } = req.query;
 
     // Build query
     let query = { isPublished: true };
@@ -27,8 +29,44 @@ exports.getStories = async (req, res) => {
       query.author = author;
     }
 
-    if (search) {
-      query.$text = { $search: search };
+    const searchQuery = search || q;
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: searchQuery, $options: 'i' } },
+        { content: { $regex: searchQuery, $options: 'i' } },
+        { excerpt: { $regex: searchQuery, $options: 'i' } },
+        { 'location.country': { $regex: searchQuery, $options: 'i' } },
+        { 'location.city': { $regex: searchQuery, $options: 'i' } }
+      ];
+    }
+
+    if (destination) {
+      const destinationQuery = {
+        $or: [
+          { 'location.country': { $regex: destination, $options: 'i' } },
+          { 'location.city': { $regex: destination, $options: 'i' } }
+        ]
+      };
+
+      if (query.$or) {
+        // Combine both $or conditions with $and
+        query.$and = [
+          { $or: query.$or },
+          destinationQuery
+        ];
+        delete query.$or;
+      } else {
+        query.$or = destinationQuery.$or;
+      }
+    }
+
+    if (reachableBy) {
+      const modes = reachableBy.split(',');
+      query.reachableBy = { $in: modes };
+    }
+
+    if (familyFriendly === 'true' || familyFriendly === true) {
+      query.familyFriendly = true;
     }
 
     const stories = await Story.find(query)
@@ -75,10 +113,6 @@ exports.getStory = async (req, res) => {
       });
     }
 
-    // Increment views
-    story.views += 1;
-    await story.save();
-
     res.status(200).json({
       success: true,
       data: { story }
@@ -92,12 +126,93 @@ exports.getStory = async (req, res) => {
   }
 };
 
+// @desc    Count a story view
+// @route   POST /api/stories/:id/view
+// @access  Public
+exports.countStoryView = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id).select('views');
+
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: 'Story not found'
+      });
+    }
+
+    const { visitorId } = req.body;
+    if (typeof visitorId !== 'string' || !/^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i.test(visitorId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid visitor ID is required'
+      });
+    }
+
+    const now = new Date();
+    const cooldownCutoff = new Date(now.getTime() - 10_000);
+    let canCountView = await StoryView.findOneAndUpdate(
+      {
+        story: story._id,
+        visitorId,
+        lastViewedAt: { $lte: cooldownCutoff }
+      },
+      { $set: { lastViewedAt: now } },
+      { new: true }
+    );
+
+    if (!canCountView) {
+      try {
+        await StoryView.create({
+          story: story._id,
+          visitorId,
+          lastViewedAt: now
+        });
+        canCountView = true;
+      } catch (error) {
+        if (error.code !== 11000) throw error;
+      }
+    }
+
+    if (!canCountView) {
+      const currentStory = await Story.findById(story._id).select('views');
+      return res.status(200).json({
+        success: true,
+        data: { views: currentStory.views, counted: false }
+      });
+    }
+
+    const updatedStory = await Story.findByIdAndUpdate(
+      story._id,
+      { $inc: { views: 1 } },
+      { new: true, select: 'views' }
+    );
+
+    if (!updatedStory) {
+      return res.status(404).json({
+        success: false,
+        message: 'Story not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { views: updatedStory.views, counted: true }
+    });
+  } catch (error) {
+    console.error('Count story view error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error counting story view'
+    });
+  }
+};
+
 // @desc    Create story
 // @route   POST /api/stories
 // @access  Private
 exports.createStory = async (req, res) => {
   try {
-    const { title, content, excerpt, coverImage, images, location, tags, category } = req.body;
+    const { title, content, excerpt, coverImage, images, location, reachableBy, familyFriendly, familyFriendlyNote, tags, category } = req.body;
 
     const story = await Story.create({
       title,
@@ -106,6 +221,9 @@ exports.createStory = async (req, res) => {
       coverImage,
       images,
       location,
+      reachableBy,
+      familyFriendly,
+      familyFriendlyNote,
       tags,
       category,
       author: req.user.id
@@ -150,11 +268,11 @@ exports.updateStory = async (req, res) => {
       });
     }
 
-    const { title, content, excerpt, coverImage, images, location, tags, category, isPublished } = req.body;
+    const { title, content, excerpt, coverImage, images, location, reachableBy, familyFriendly, familyFriendlyNote, tags, category, isPublished } = req.body;
 
     story = await Story.findByIdAndUpdate(
       req.params.id,
-      { title, content, excerpt, coverImage, images, location, tags, category, isPublished },
+      { title, content, excerpt, coverImage, images, location, reachableBy, familyFriendly, familyFriendlyNote, tags, category, isPublished },
       { new: true, runValidators: true }
     ).populate('author', 'username firstName lastName profileImage');
 
@@ -236,6 +354,15 @@ exports.toggleLike = async (req, res) => {
       // Like
       story.likes.push(req.user.id);
       story.likesCount += 1;
+
+      if (story.author && story.author.toString() !== req.user.id.toString()) {
+        await Notification.create({
+          user: story.author,
+          message: `${req.user.username || 'Someone'} liked your story`,
+          type: 'like',
+          link: `/story/${story._id}`
+        });
+      }
     }
 
     await story.save();
@@ -275,6 +402,63 @@ exports.getTrendingStories = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error fetching trending stories'
+    });
+  }
+};
+
+// @desc    Bookmark/unbookmark story
+// @route   POST /api/stories/:id/bookmark
+// @access  Private
+exports.toggleBookmark = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: 'Story not found'
+      });
+    }
+
+    const isBookmarked = await story.toggleBookmark(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: isBookmarked ? 'Story bookmarked' : 'Story removed from bookmarks',
+      data: { isBookmarked }
+    });
+  } catch (error) {
+    console.error('Toggle bookmark error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error toggling bookmark'
+    });
+  }
+};
+
+// @desc    Get user's bookmarked stories
+// @route   GET /api/stories/bookmarked
+// @access  Private
+exports.getUserBookmarkedStories = async (req, res) => {
+  try {
+    const stories = await Story.find({
+      $and: [
+        { isPublished: true },
+        { bookmarks: req.user.id }
+      ]
+    })
+      .populate('author', 'username firstName lastName profileImage')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: { stories }
+    });
+  } catch (error) {
+    console.error('Get bookmarked stories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching bookmarked stories'
     });
   }
 };

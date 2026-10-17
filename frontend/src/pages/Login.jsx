@@ -55,78 +55,77 @@ function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-6 py-12">
-      <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-          Login
-        </h2>
+    <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
+      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 shadow-[0_25px_60px_-25px_rgba(37,99,235,0.35)] backdrop-blur-sm">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-8 text-white">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-100">Welcome back</p>
+          <h2 className="mt-3 text-3xl font-black">Login</h2>
+        </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        <div className="p-6 sm:p-8">
+          {error && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                validationErrors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
+                  validationErrors.email ? 'border-red-400' : 'border-slate-200'
+                }`}
+                disabled={loading}
+              />
+              {validationErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className={`w-full rounded-xl border px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
+                  validationErrors.password ? 'border-red-400' : 'border-slate-200'
+                }`}
+                disabled={loading}
+              />
+              {validationErrors.password && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
               disabled={loading}
-            />
-            {validationErrors.email && (
-              <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                validationErrors.password ? 'border-red-500' : 'border-gray-300'
+              className={`w-full rounded-xl px-6 py-3 font-semibold text-white transition ${
+                loading ? 'cursor-not-allowed bg-slate-300' : 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/20'
               }`}
-              disabled={loading}
-            />
-            {validationErrors.password && (
-              <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
-            )}
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-center justify-between text-sm text-slate-600">
+            <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">
+              Forgot password?
+            </Link>
+            <Link to="/register" className="font-semibold text-blue-600 hover:underline">
+              Sign up
+            </Link>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full px-6 py-3 font-medium rounded-lg transition-colors ${
-              loading
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-primary-dark'
-            }`}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-primary hover:underline font-medium">
-            Sign up
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
