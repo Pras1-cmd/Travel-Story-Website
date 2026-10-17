@@ -1,146 +1,246 @@
-# Travel Story Website
+# 🌍 Travel Story Website
 
-A full-stack travel story sharing platform where users can create, share, and discover travel experiences. Built as a college project using the MERN stack.
+A full-stack travel storytelling platform built using the MERN stack. Users can share their travel experiences, upload photos, discover destinations, and interact with stories shared by other travelers.
 
-## Tech Stack
+## ✨ Features
 
-- **Frontend**: React 18, Tailwind CSS, Vite, React Router, Axios
-- **Backend**: Node.js, Express.js, MongoDB, Mongoose, JWT Authentication
-- **Media Storage**: Cloudinary
-- **Styling**: Tailwind CSS
+- **User Authentication** — Register, login, logout, and protected routes.
+- **User Profiles** — Manage profile information, avatar, and bio.
+- **Travel Stories** — Create, view, edit, and delete travel stories.
+- **Image Gallery** — Upload multiple images and view them in a gallery.
+- **Likes and Comments** — Interact with stories shared by other users.
+- **Bookmarks** — Save stories and access them from the Saved Stories page.
+- **Search and Filters** — Search by title, description, and destination.
+- **Category Filters** — Explore Adventure, Beach, Trekking, Food, Culture, Nature, and Other stories.
+- **Transport Information** — View available travel options, including Train, Bus, Vehicle, and Flight.
+- **Family Friendly** — Identify destinations suitable for families and elderly travelers.
+- **Popular and Recent Stories** — Discover trending stories and the latest travel experiences.
+- **Story View Counter** — Track story views.
+- **Contact and Feedback** — Submit feedback through the contact form.
+- **Responsive Design** — Interface designed for mobile, tablet, and desktop screens.
 
-## Features
+## 🛠️ Tech Stack
 
-### Core
-- User Registration & Login (JWT-based)
-- User Profile with avatar
-- Create / Edit / Delete Travel Stories
-- Image Gallery with Cloudinary uploads
+### Frontend
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
 
-### Social
-- Like / Unlike stories
-- Comment on stories
-- Bookmark stories for later
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- bcrypt
+- Multer
+- Cloudinary
 
-### Discovery
-- Search stories by title, destination, or content
-- Filter by destination
-- Filter by category
-- Popular Stories section
-- Recent Stories section
-- Story View Counter
+*The technologies and features listed above should be checked against the actual project implementation.*
 
-### Travel-Specific
-- **Reachable By** — multi-select: Train, Bus, Vehicle, Flight
-- **Family Friendly** — yes/no indicator with optional suitability note
+## 📁 Project Structure
 
-### Other
-- Contact / Feedback Form
-- Responsive design (mobile, tablet, desktop)
-
-## Project Structure
-
-```
+```text
 Travel Story Website/
-├── frontend/          # React + Tailwind CSS
-├── backend/           # Node.js + Express + MongoDB
-├── .env.example       # Environment variables template
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── utils/
+│   ├── index.html
+│   └── package.json
+├── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
+│   └── package.json
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
 
-## Prerequisites
+## ⚙️ Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+)
-- [MongoDB](https://www.mongodb.com/) (local or Atlas)
-- [Cloudinary](https://cloudinary.com/) account (free tier)
+Install the following before running the project:
 
-## Setup
+- Node.js and npm
+- MongoDB Atlas account or a compatible MongoDB instance
+- Cloudinary account for image uploads
+- Git (optional, for version control)
+
+## 🚀 Installation and Setup
 
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone YOUR_REPOSITORY_URL
 cd "Travel Story Website"
 ```
 
-### 2. Environment Variables
+Replace `YOUR_REPOSITORY_URL` with your actual repository URL.
 
-Copy `.env.example` to `backend/.env` and fill in your values:
-
-```bash
-cp .env.example backend/.env
-```
-
-### 3. Backend Setup
+### 2. Install backend dependencies
 
 ```bash
 cd backend
 npm install
+```
+
+### 3. Configure backend environment variables
+
+Create a `.env` file inside the `backend/` directory using the actual variable names expected by the backend.
+
+Example:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_long_random_secret
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+Use your own credentials. Never commit your `.env` file or expose your secrets publicly.
+
+### 4. Start the backend
+
+Run the command supported by your backend's `package.json`, for example:
+
+```bash
 npm run dev
 ```
 
-### 4. Frontend Setup
+If the project does not have a `dev` script, check the available scripts and use the appropriate start command.
+
+### 5. Install frontend dependencies
+
+Open another terminal from the project root:
 
 ```bash
 cd frontend
 npm install
+```
+
+### 6. Configure the frontend API URL
+
+Check `frontend/src/services/api.js` and the existing environment configuration. Set the API base URL according to the backend address and the configuration already used by the project.
+
+For a local backend running on port 5000, the API base URL might be:
+
+```text
+http://localhost:5000/api
+```
+
+Use this only if it matches the backend's actual route configuration.
+
+### 7. Start the frontend
+
+```bash
 npm run dev
 ```
 
-### 5. Open the App
+Open the local URL displayed by Vite in your terminal, usually `http://localhost:5173`.
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5000`
+## 🔌 API Overview
 
-## Environment Variables
+The following are expected API areas based on the project requirements. Exact paths and supported methods depend on the implemented backend.
 
-| Variable | Description |
-|----------|-------------|
-| `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Secret key for JWT tokens |
-| `PORT` | Backend server port (default: 5000) |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| Feature | Purpose |
+|---|---|
+| Authentication | Register, login, and retrieve the current user |
+| Stories | Create, list, retrieve, update, and delete stories |
+| Likes | Like or unlike a story |
+| Comments | Add, retrieve, and delete comments |
+| Bookmarks | Save or remove saved stories |
+| User Profile | View and update profile information |
+| Search and Filters | Search and filter stories with pagination |
+| Popular Stories | Retrieve popular travel stories |
+| Recent Stories | Retrieve recently created stories |
+| Contact | Submit contact or feedback information |
+| Health Check | Check backend availability |
 
-## Documentation
+For exact endpoint paths and request formats, refer to the backend routes and controllers.
 
-Detailed documentation is available in the `docs/` folder:
+## 🧪 Testing
 
-- [PRD.md](../docs/PRD.md) — Product Requirements Document
-- [ARCHITECTURE.md](../docs/ARCHITECTURE.md) — System Architecture
-- [DESIGN.md](../docs/DESIGN.md) — Design Specifications
-- [RULES.md](../docs/RULES.md) — Development Rules
-- [TASKS.md](../docs/TASKS.md) — Task Checklist
-- [TEST_PLAN.md](../docs/TEST_PLAN.md) — Test Plan
+Run the test scripts available in each package.
 
-## Development Status
+For example:
 
-**Current Phase: Phase 2 (Frontend Authentication)**
+```bash
+cd backend
+npm test
+```
 
-### Phase Status
-1. ✅ **Documentation** (PRD, Architecture, Design, Rules, Tasks, Test Plan)
-2. ✅ **Project Setup & Environment** (Full-stack MERN project structure, backend connected to MongoDB Atlas)
-3. ✅ **Backend Authentication System** (JWT-based auth with registration/login endpoints, verified working)
-4. 🔄 **Frontend Authentication** (Currently implementing registration/login UI to connect with backend API)
-5. ⬜ **User Profile**
-6. ⬜ **Story CRUD**
-7. ⬜ **Reachable By & Family Friendly**
-8. ⬜ **Social Interactions** (Likes, Comments, Bookmarks)
-9. ⬜ **Search & Filters**
-10. ⬜ **Home Page Features**
-11. ⬜ **Contact & Feedback**
-12. ⬜ **Polish & Refinement**
-13. ⬜ **Testing**
-14. ⬜ **Deployment**
+```bash
+cd frontend
+npm test
+```
 
-### Recent Progress (2026-10-01)
-- ✅ Backend server deployed with MongoDB Atlas connection
-- ✅ User registration and login APIs working with JWT authentication
-- ✅ Test user registration confirmed in MongoDB database
-- 🔄 Frontend authentication forms under development (Phase 2 in progress)
+These commands work only if the corresponding test scripts are configured in the respective `package.json` files.
 
-## License
+Check the production frontend build using:
 
-This project is for educational purposes (college project).
+```bash
+npm run build
+```
+
+Run it from the `frontend/` directory.
+
+Recommended manual checks:
+
+- Register and log in with a test account.
+- Create, edit, and delete a travel story.
+- Verify image uploads.
+- Test likes, comments, and bookmarks.
+- Test search, filters, and pagination.
+- Verify profile editing and contact form submission.
+- Check protected routes and story ownership permissions.
+- Test mobile and desktop layouts.
+
+## 🔐 Security
+
+- Store passwords using secure password hashing.
+- Verify JWTs on protected backend routes.
+- Enforce story ownership checks on the server.
+- Validate user input and uploaded files.
+- Keep environment variables and API secrets private.
+- Use appropriate CORS settings and production security configuration.
+- Never commit `.env` files or real credentials.
+
+## 🌐 Deployment
+
+The project can be deployed using services such as:
+
+- **Frontend:** Vercel or Netlify
+- **Backend:** Render or another Node.js hosting service
+- **Database:** MongoDB Atlas
+- **Image Storage:** Cloudinary
+
+Before deployment, configure the production environment variables, frontend API URL, CORS allowed origins, and hosting build/start commands. Verify the deployed application using the production URLs.
+
+## 🔮 Future Improvements
+
+Potential improvements include enhanced destination discovery, better image optimization, additional accessibility enhancements, and expanded automated test coverage.
+
+## 👨‍💻 Project Information
+
+**Project Name:** Travel Story Website
+
+**Technology:** MERN Stack
+
+**Project Type:** Full-Stack Web Development / College Project
+
+## 📄 License
+
+This project is developed for educational purposes. Add an appropriate license if you intend to distribute or reuse the project publicly.

@@ -50,9 +50,38 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   isVerified: {
     type: Boolean,
     default: false
+  },
+  emailVerificationToken: {
+    type: String,
+    default: ''
+  },
+  passwordResetToken: {
+    type: String,
+    default: ''
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null
+  },
+  notifications: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification'
+  }],
+  lastLoginAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -78,6 +107,10 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
   delete user.password;
+  delete user.emailVerificationToken;
+  delete user.passwordResetToken;
+  delete user.passwordResetExpires;
+  delete user.notifications;
   return user;
 };
 

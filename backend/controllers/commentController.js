@@ -1,5 +1,6 @@
 const Comment = require('../models/Comment');
 const Story = require('../models/Story');
+const Notification = require('../models/Notification');
 
 // @desc    Get comments for a story
 // @route   GET /api/comments/story/:storyId
@@ -31,11 +32,19 @@ exports.getComments = async (req, res) => {
 // @access  Private
 exports.createComment = async (req, res) => {
   try {
-    const { content, storyId, parentCommentId } = req.body;
+    const { content, storyId, story, parentCommentId } = req.body;
+    const resolvedStoryId = storyId || story;
+
+    if (!resolvedStoryId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Story ID is required'
+      });
+    }
 
     // Check if story exists
-    const story = await Story.findById(storyId);
-    if (!story) {
+    const storyDoc = await Story.findById(resolvedStoryId);
+    if (!storyDoc) {
       return res.status(404).json({
         success: false,
         message: 'Story not found'
@@ -55,14 +64,23 @@ exports.createComment = async (req, res) => {
 
     const comment = await Comment.create({
       content,
-      story: storyId,
+      story: resolvedStoryId,
       author: req.user.id,
       parentComment: parentCommentId || null
     });
 
     // Update story comments count
-    story.commentsCount += 1;
-    await story.save();
+    storyDoc.commentsCount += 1;
+    await storyDoc.save();
+
+    if (storyDoc.author && storyDoc.author.toString() !== req.user.id.toString()) {
+      await Notification.create({
+        user: storyDoc.author,
+        message: `${req.user.username || 'Someone'} commented on your story`,
+        type: 'comment',
+        link: `/story/${storyDoc._id}`
+      });
+    }
 
     const populatedComment = await Comment.findById(comment._id)
       .populate('author', 'username firstName lastName profileImage');

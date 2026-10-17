@@ -1,11 +1,18 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { register, login, getMe } = require('../controllers/authController');
+const {
+  register,
+  login,
+  getMe,
+  requestEmailVerification,
+  verifyEmail,
+  forgotPassword,
+  resetPassword
+} = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Validation rules
 const registerValidation = [
   body('username')
     .trim()
@@ -44,9 +51,13 @@ const loginValidation = [
     .withMessage('Password is required')
 ];
 
-// Routes
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.get('/me', protect, getMe);
+router.post('/verify-email', protect, requestEmailVerification);
+router.get('/verify-email/:token', verifyEmail);
+router.post('/verify-email/:token', verifyEmail);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;
