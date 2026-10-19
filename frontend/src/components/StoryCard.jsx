@@ -1,55 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { storyAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import BookmarkButton from './BookmarkButton';
 
 function StoryCard({ story, onStoryUpdate }) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [likesCount, setLikesCount] = useState(story.likesCount || 0);
   const [bookmarksCount, setBookmarksCount] = useState(story.bookmarksCount || 0);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // This would need to check if current user has liked/bookmarked
-    // For now, we'll handle this through the parent component passing user context
-  }, []);
-
-  useEffect(() => {
-    // This would need to check if current user has liked/bookmarked
-    // For now, we'll handle this through the parent component passing user context
-  }, []);
-
-  const handleLike = async () => {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-      const response = await storyAPI.toggleLike(story._id);
-      setIsLiked(response.data.data.isLiked);
-      setLikesCount(response.data.data.likesCount);
-      if (onStoryUpdate) onStoryUpdate();
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBookmark = async () => {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-      const response = await storyAPI.toggleBookmark(story._id);
-      setIsBookmarked(response.data.data.isBookmarked);
-      setBookmarksCount(prev => response.data.data.isBookmarked ? prev + 1 : prev - 1);
-      if (onStoryUpdate) onStoryUpdate();
-    } catch (error) {
-      console.error('Error toggling bookmark:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user, isAuthenticated } = useAuth();
+  const userId = user?.id || user?._id;
+  const isBookmarked = Boolean(userId && story.bookmarks?.some(
+    (bookmarkId) => bookmarkId?.toString() === userId.toString()
+  ));
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -112,12 +72,27 @@ function StoryCard({ story, onStoryUpdate }) {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-          <span>{story.views || 0}</span>
+        <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
+              <BookmarkButton
+                storyId={story._id}
+                initialBookmarked={isBookmarked}
+                onBookmarkToggle={(bookmarked) => {
+                  setBookmarksCount((count) => Math.max(0, count + (bookmarked ? 1 : -1)));
+                  onStoryUpdate?.();
+                }}
+              />
+              <span>{bookmarksCount}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span>{story.views || 0}</span>
+          </div>
         </div>
       </div>
     </article>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { storyAPI } from '../services/api';
 import StoryCard from '../components/StoryCard';
 
 function SavedStories() {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchSavedStories();
@@ -13,10 +15,12 @@ function SavedStories() {
   const fetchSavedStories = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await storyAPI.getBookmarkedStories();
       setStories(response.data.data.stories || []);
     } catch (error) {
       console.error('Error fetching saved stories:', error);
+      setError(error.response?.data?.message || 'Unable to load your saved stories.');
     } finally {
       setLoading(false);
     }
@@ -34,7 +38,18 @@ function SavedStories() {
     <div className="max-w-7xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Saved Stories</h1>
 
-      {stories.length > 0 ? (
+      {error ? (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-700">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={fetchSavedStories}
+            className="mt-4 rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800"
+          >
+            Try again
+          </button>
+        </div>
+      ) : stories.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stories.map((story) => (
             <StoryCard key={story._id} story={story} onStoryUpdate={fetchSavedStories} />
@@ -47,6 +62,12 @@ function SavedStories() {
           </svg>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">No saved stories yet</h2>
           <p className="text-gray-600 mb-6">Start exploring and save stories you want to read later!</p>
+          <Link
+            to="/stories"
+            className="inline-flex rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            Explore stories
+          </Link>
         </div>
       )}
     </div>

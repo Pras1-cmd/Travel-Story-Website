@@ -116,19 +116,21 @@ storySchema.methods.updateBookmarksCount = async function() {
 
 // Check if story is bookmarked by user
 storySchema.methods.isBookmarkedBy = function(userId) {
-  return this.bookmarks.includes(userId);
+  const userIdString = userId.toString();
+  return this.bookmarks.some(bookmarkId => bookmarkId.toString() === userIdString);
 };
 
 // Toggle bookmark status
 storySchema.methods.toggleBookmark = async function(userId) {
-  const index = this.bookmarks.indexOf(userId);
+  const userIdString = userId.toString();
+  const index = this.bookmarks.findIndex(bookmarkId => bookmarkId.toString() === userIdString);
   if (index > -1) {
     this.bookmarks.splice(index, 1);
   } else {
     this.bookmarks.push(userId);
   }
   await this.updateBookmarksCount();
-  return index === -1; // Return true if now bookmarked, false if removed
+  return index === -1;
 };
 
 module.exports = mongoose.model('Story', storySchema);
